@@ -1,1 +1,1 @@
-### This repo contains files for different large language models practice
+This repo contains of types of practice files on LLMs
