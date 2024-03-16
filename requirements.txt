@@ -10,3 +10,6 @@ unstructured[pdf]
 tiktoken
 poppler-utils
 # detectron2@git+https://github.com/facebookresearch/detectron2.git@v0.6#egg=detectron2
+streamlit
+streamlit_chat
+sentence_transformers
