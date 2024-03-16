@@ -1,4 +1,4 @@
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain.prompts import (
@@ -9,7 +9,7 @@ from langchain.prompts import (
 )
 import streamlit as st
 from streamlit_chat import message
-from utils import *
+from pinecone_indexing import query_refiner, get_conversation_string, find_match
 
 st.subheader("Chatbot with Langchain, ChatGPT, Pinecone, and Streamlit")
 

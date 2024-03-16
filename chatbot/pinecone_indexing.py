@@ -1,4 +1,5 @@
-import openai
+import os
+from openai import OpenAI
 import streamlit as st
 import os
 from pinecone import Pinecone, PodSpec
@@ -88,9 +89,13 @@ def query_refiner(conversation: str, query: str) -> str:
     Returns:
         str: The refined query.
     """
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt=f"Given the following user query and conversation log, formulate a question that would be the most relevant to provide the user with an answer from a knowledge base.\n\nCONVERSATION LOG: \n{conversation}\n\nQuery: {query}\n\nRefined Query:",
+    client = OpenAI()
+    response = client.chat.completions.create(
+        model=" gpt-3.5-turbo-instruct",
+        messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"Given the following user query and conversation log, formulate a question that would be the most relevant to provide the user with an answer from a knowledge base.\n\nCONVERSATION LOG: \n{conversation}\n\nQuery: {query}\n\nRefined Query:",}
+                ],
         temperature=0.7,
         max_tokens=256,
         top_p=1,
