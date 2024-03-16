@@ -1,3 +1,5 @@
+import openai
+import streamlit as st
 import os
 from pinecone import Pinecone, PodSpec
 from langchain_pinecone import Pinecone as pineconestore
@@ -9,7 +11,6 @@ from typing import List
 from dotenv import load_dotenv
 import logging
 import pdb
-from utils import *
 
 # Configure logging to write to a file
 logging.basicConfig(level=logging.INFO,
@@ -76,6 +77,57 @@ def get_similar_docs(query: str, k: int = 2, score: bool = False) -> List:
         similar_docs = index.similarity_search(query, k=k)
     return similar_docs
 
+def query_refiner(conversation: str, query: str) -> str:
+    """
+    This function takes the conversation history and the user query as input and returns a refined query based on the conversation history.
+
+    Args:
+        conversation (str): The conversation history as a string.
+        query (str): The user query.
+
+    Returns:
+        str: The refined query.
+    """
+    response = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=f"Given the following user query and conversation log, formulate a question that would be the most relevant to provide the user with an answer from a knowledge base.\n\nCONVERSATION LOG: \n{conversation}\n\nQuery: {query}\n\nRefined Query:",
+        temperature=0.7,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+    return response['choices'][0]['text']
+
+def get_conversation_string() -> str:
+    """
+    This function takes the conversation history stored in the Streamlit session state and returns it as a string.
+
+    Returns:
+        str: The conversation history as a string.
+    """
+    conversation_string = ""
+    for i in range(len(st.session_state['responses'])-1):
+
+        conversation_string += "Human: "+st.session_state['requests'][i] + "\n"
+        conversation_string += "Bot: " + \
+            st.session_state['responses'][i+1] + "\n"
+    return conversation_string
+
+def find_match(input: str) -> str:
+    """
+    This function takes an input string and returns the two most similar documents from the Pinecone index.
+
+    Args:
+        input (str): The input string.
+
+    Returns:
+        str: The two most similar documents from the Pinecone index, separated by a new line.
+    """
+    input_em = model.encode(input).tolist()
+    result = index.query(input_em, top_k=2, includeMetadata=True)
+    return result['matches'][0]['metadata']['text'] + "\n" + result['matches'][1]['metadata']['text']
+
 # Load documents
 logger.info('Loading documents...')
 documents = load_docs(directory)
@@ -124,8 +176,3 @@ similar_docs = get_similar_docs(query)
 logger.info(f'Total documents loaded: {similar_docs}')
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
-
-def find_match(input):
-    input_em = model.encode(input).tolist()
-    result = index.query(input_em, top_k=2, includeMetadata=True)
-    return result['matches'][0]['metadata']['text']+"\n"+result['matches'][1]['metadata']['text']
