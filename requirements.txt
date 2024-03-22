@@ -13,3 +13,5 @@ poppler-utils
 streamlit
 streamlit_chat
 sentence_transformers
+langchainhub
+chromadb
