@@ -2,3 +2,6 @@
 *.log
 *.__pycahce__
 *.pycache
+*.csv
+*.json
+*.h5
