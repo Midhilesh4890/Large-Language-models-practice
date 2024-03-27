@@ -34,7 +34,7 @@ X_test, y_test = process_data(test_sentences, word2idx, tag2idx, max_len)
 logger.info("Data processed successfully")
 
 # Define the model configurations
-model_configs = [(64, 32)]#, (128, 64), (256, 128)]
+model_configs = [(64, 32), (128, 64), (256, 128)]
 
 # Train and predict with LSTM model
 logger.info("Training and predicting with LSTM model")

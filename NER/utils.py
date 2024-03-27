@@ -12,6 +12,7 @@ import warnings
 import os
 from sklearn.metrics import accuracy_score
 
+
 # Ignore specific category warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
 warnings.filterwarnings('ignore', category=DeprecationWarning)
@@ -97,7 +98,7 @@ def train_and_predict_with_model(build_model_func, model_configs, X_train, y_tra
     weights_folder = 'weights'
     for i, (lstm_units, dense_units) in enumerate(model_configs, start=1):
         logger.info(
-            "Training model %d with LSTM units: %d, Dense units: %d", i, lstm_units, dense_units)
+            f"Training model %d with {modelname} units: %d, Dense units: %d", i, lstm_units, dense_units)
         model = build_model_func(
             word2idx, tag2idx, lstm_units, dense_units, max_len)
         model.fit(X_train, y_train, batch_size=32,
@@ -151,3 +152,4 @@ def get_accuracy_score(predictions, idx2tag, true_labels, model_name):
     logger.info(f'Accuracy for {model_name}: {accuracy}')
     # Evaluation using classification report
     classification_report(true_tags_flat, pred_tags_flat)
+    return accuracy

@@ -1,6 +1,7 @@
 from utils import *
 import logging
 import mlflow
+from mlflow.models.signature import infer_signature
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -11,6 +12,7 @@ max_len = 50
 
 # Initialize MLflow experiment
 mlflow.set_experiment("NER_Model_Training")
+mlflow.set_tracking_uri("http://127.0.0.1:5000/")
 
 # Load and prepare data
 logger.info("Loading and preparing data")
@@ -36,6 +38,11 @@ X_train, y_train = process_data(train_sentences, word2idx, tag2idx, max_len)
 X_test, y_test = process_data(test_sentences, word2idx, tag2idx, max_len)
 logger.info("Data processed successfully")
 
+# Convert true labels to tags
+true_labels = np.argmax(y_test, axis=-1)
+idx2tag = {i: w for w, i in tag2idx.items()}
+true_tags = [[idx2tag[i] for i in row] for row in true_labels]
+
 # Define the model configurations
 model_configs = [(64, 32), (128, 64), (256, 128)]
 
@@ -43,7 +50,7 @@ for config in model_configs:
     lstm_units, dense_units = config
 
     # Start a new MLflow run for each model configuration
-    with mlflow.start_run():
+    with mlflow.start_run(run_name="LSTM_{}_{}".format(lstm_units, dense_units)):
         # Log parameters
         mlflow.log_param("lstm_units", lstm_units)
         mlflow.log_param("dense_units", dense_units)
@@ -64,13 +71,11 @@ for config in model_configs:
             'lstm'
         )
         logger.info("LSTM model trained and predictions made")
-
-        # Log metrics (example: accuracy)
-        # Note: Actual metric calculation should be done based on model predictions
-        # mlflow.log_metric("accuracy", calculated_accuracy)
-
         # Save the model
         mlflow.keras.log_model(build_lstm_model(
             word2idx, tag2idx, lstm_units, dense_units, max_len), "model")
-
+        # Log metrics (example: accuracy)
+        calculated_accuracy = get_accuracy_score(lstm_predictions, idx2tag, true_labels, "LSTM")
+        mlflow.log_metric("accuracy", calculated_accuracy)
+       
 logger.info("Experiment completed. Results logged to MLflow.")
