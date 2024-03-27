@@ -32,7 +32,6 @@ def load_and_prepare_data(file_path):
 
 
 def create_mappings(sentences):
-    logger.info("Creating word and tag mappings")
     words = [word for sentence in sentences for word, tag in sentence]
     tags = [tag for sentence in sentences for word, tag in sentence]
     word2idx = {w: i + 1 for i, w in enumerate(set(words))}
@@ -41,7 +40,6 @@ def create_mappings(sentences):
 
 
 def process_data(sentences, word2idx, tag2idx, max_len):
-    logger.info("Processing data for training")
     X = [[word2idx.get(w[0], 0) for w in s] for s in sentences]
     X = pad_sequences(maxlen=max_len, sequences=X, padding="post", value=0)
 
@@ -54,7 +52,6 @@ def process_data(sentences, word2idx, tag2idx, max_len):
 
 
 def build_lstm_model(word2idx, tag2idx, lstm_units, dense_units, max_len):
-    logger.info("Building LSTM model")
     input_layer = Input(shape=(max_len,))
     embedding_layer = Embedding(input_dim=len(
         word2idx) + 1, output_dim=50, input_shape=(max_len,))(input_layer)
@@ -69,7 +66,6 @@ def build_lstm_model(word2idx, tag2idx, lstm_units, dense_units, max_len):
 
 
 def build_bilstm_model(word2idx, tag2idx, lstm_units, dense_units, max_len):
-    logger.info("Building BiLSTM model")
     input_layer = Input(shape=(max_len,))
     embedding = Embedding(input_dim=len(word2idx) + 1,
                           output_dim=50, input_shape=(max_len,))(input_layer)
