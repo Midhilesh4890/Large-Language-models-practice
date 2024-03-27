@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import random
 import logging
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -10,6 +9,8 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.utils import to_categorical
 import warnings
+import os
+from sklearn.metrics import accuracy_score
 
 # Ignore specific category warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
@@ -65,7 +66,7 @@ def build_lstm_model(word2idx, tag2idx, lstm_units, dense_units, max_len):
     return model
 
 
-def build_bilstm_model(word2idx, tag2idx, lstm_units, dense_units, max_len):
+def build_bilstm_model(word2idx, tag2idx,lstm_units, dense_units, max_len):
     input_layer = Input(shape=(max_len,))
     embedding = Embedding(input_dim=len(word2idx) + 1,
                           output_dim=50, input_shape=(max_len,))(input_layer)
@@ -91,8 +92,9 @@ def build_bilstm_model(word2idx, tag2idx, lstm_units, dense_units, max_len):
     return model
 
 
-def train_and_predict_with_model(build_model_func, model_configs, X_train, y_train, X_test, word2idx, tag2idx, max_len):
+def train_and_predict_with_model(build_model_func, model_configs, X_train, y_train, X_test, word2idx, tag2idx, max_len, modelname):
     predictions = []
+    weights_folder = 'weights'
     for i, (lstm_units, dense_units) in enumerate(model_configs, start=1):
         logger.info(
             "Training model %d with LSTM units: %d, Dense units: %d", i, lstm_units, dense_units)
@@ -102,9 +104,12 @@ def train_and_predict_with_model(build_model_func, model_configs, X_train, y_tra
                   epochs=1, validation_split=0.1)
         logger.info("Predicting with model %d", i)
         predictions.append(model.predict(X_test, verbose=1))
-        # Optionally save the model weights
-        # model.save_weights(f'ner_model_{i}.weights.h5')
-    return np.mean(np.array(predictions), axis=0)
+        # Create the results folder if it doesn't exist
+        if not os.path.exists(weights_folder):
+            os.makedirs(weights_folder)
+        model.save_weights(os.path.join(weights_folder, f'{modelname}_{i}.weights.h5'))
+    final_predictions = np.mean(np.array(predictions), axis=0)
+    return final_predictions
 
 def save_results_to_csv(predictions, test_sentences, true_tags, model_name, tag2idx):
     idx2tag = {i: w for w, i in tag2idx.items()}
@@ -120,7 +125,29 @@ def save_results_to_csv(predictions, test_sentences, true_tags, model_name, tag2
 
     results_df = pd.DataFrame(results)
 
-    filename = f"{model_name}_results.csv"
+    # Define the folder to save results
+    results_folder = "results"
+
+    # Create the results folder if it doesn't exist
+    if not os.path.exists(results_folder):
+        os.makedirs(results_folder)
+
+    # Define the file path including the folder
+    filename = os.path.join(results_folder, f"{model_name}_results.csv")
+    logger.info("Results saved to %s", filename)
     results_df.to_csv(filename, index=False)
 
-    logger.info("Results saved to %s", filename)
+def get_accuracy_score(predictions, idx2tag, true_labels, model_name):
+    pred_labels = np.argmax(predictions, axis=-1)
+    pred_tags = [[idx2tag[i] for i in row] for row in pred_labels]
+    true_tags = [[idx2tag[i] for i in row] for row in true_labels]
+    
+    # Flatten the lists
+    pred_tags_flat = [tag for sublist in pred_tags for tag in sublist]
+    true_tags_flat = [tag for sublist in true_tags for tag in sublist]
+    
+    # Calculate accuracy
+    accuracy = accuracy_score(true_tags_flat, pred_tags_flat)
+    logger.info(f'Accuracy for {model_name}: {accuracy}')
+    # Evaluation using classification report
+    classification_report(true_tags_flat, pred_tags_flat)

@@ -1,6 +1,7 @@
 from utils import *
 import logging
 
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -33,7 +34,7 @@ X_test, y_test = process_data(test_sentences, word2idx, tag2idx, max_len)
 logger.info("Data processed successfully")
 
 # Define the model configurations
-model_configs = [(64, 32), (128, 64), (256, 128)]
+model_configs = [(64, 32)]#, (128, 64), (256, 128)]
 
 # Train and predict with LSTM model
 logger.info("Training and predicting with LSTM model")
@@ -45,7 +46,8 @@ lstm_predictions = train_and_predict_with_model(
     X_test,
     word2idx,
     tag2idx,
-    max_len
+    max_len,
+    'lstm'
 )
 logger.info("LSTM model trained and predictions made")
 
@@ -59,7 +61,8 @@ bilstm_predictions = train_and_predict_with_model(
     X_test,
     word2idx,
     tag2idx,
-    max_len
+    max_len,
+    'bilstm'
 )
 logger.info("BiLSTM model trained and predictions made")
 
@@ -79,3 +82,7 @@ logger.info("Saving results for BiLSTM model")
 save_results_to_csv(bilstm_predictions, test_sentences,
                     true_tags, "BiLSTM", tag2idx)
 logger.info("Results for BiLSTM model saved successfully")
+
+get_accuracy_score(lstm_predictions, idx2tag, true_labels, "LSTM")
+get_accuracy_score(bilstm_predictions, idx2tag, true_labels, "BiLSTM")
+# Convert the predictions and true values to label sequences
