@@ -5,9 +5,7 @@ FROM python:3.8-slim
 WORKDIR /app
 
 # Copy the Python scripts and requirements file into the container at /app
-COPY ner_ensemble.py /app/ner_ensemble.py
-COPY utils.py /app/utils.py
-COPY requirements.txt /app/requirements.txt
+COPY . /app
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
