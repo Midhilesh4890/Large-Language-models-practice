@@ -1,0 +1,50 @@
+Explanation
+Logging Configuration:
+
+Configures logging to output to a file named transformer_steps.log with the INFO level and a specific message format including the timestamp, log level, and message content.
+Dataset Definition:
+
+Defines a small dataset and logs its content.
+Finding Vocabulary Size:
+
+Breaks the dataset into words, finds unique words, calculates the vocabulary size, and logs the results.
+Encoding:
+
+Assigns a unique index to each word, encodes the dataset based on this mapping, and logs the encoded dataset.
+Calculating Embedding:
+
+Creates a random embedding matrix, embeds a sample sentence, and logs the results.
+Calculating Positional Embedding:
+
+Computes positional embeddings for the sentence and logs them.
+Concatenating Embeddings:
+
+Concatenates word and positional embeddings and logs the result.
+Multi-Head Attention:
+
+Performs scaled dot-product attention using the concatenated embeddings and logs the attention output and weights.
+Adding and Normalizing:
+
+Normalizes the attention output and logs the results.
+Feed Forward Network:
+
+Applies a simple feedforward network to the normalized output and logs the results.
+Adding and Normalizing Again:
+
+Normalizes the output after the feedforward network and logs the results.
+Decoder Part:
+
+Simulates masked multi-head attention for the decoder part and logs the attention output.
+Understanding Masked Multi-Head Attention:
+
+Provides an example of masked attention, computes a combined output, and logs the results.
+Calculating the Predicted Word:
+
+Calculates a simplified prediction using logits, finds the predicted word, and logs it.
+Conclusion:
+
+Logs the conclusion of the explanation.
+Running the Code
+Ensure you have the necessary permissions to write to the current directory.
+Run the code in a Python environment that supports file I/O operations.
+After running the code, you can check transformer_steps.log for detailed log messages at each step.
