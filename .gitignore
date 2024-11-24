@@ -8,3 +8,4 @@
 *.artifacts
 *.artifacts.json
 *.artifact
+mlruns
